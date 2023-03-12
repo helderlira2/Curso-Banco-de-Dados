@@ -1,0 +1,145 @@
+-- caso precise refazer tudo utilize o comando abaixo. ele está comentado
+-- drop database dbecommerce;
+
+-- passo1: criacao de banco de dados
+create database dbecommerce
+-- Vc pode fazer a forma abaixo também para setar a confiugração de caracter
+default character set utf8
+default collate utf8_general_ci;
+
+use  dbecommerce;
+
+-- passo2: criacao de tabelas
+CREATE TABLE tbclientes (
+  `cpf` int(11) NOT NULL,
+  `nome` varchar(80) DEFAULT NULL,
+  PRIMARY KEY (`cpf`)
+) ENGINE InnoDB ;
+
+-- drop table tbprodutos;
+create table tbprodutos(
+	id_produto bigint(4), -- 9999
+	nome varchar (30) not null,
+    marca enum("Nike", "Adidas", "Puma"),
+	categoria enum("Roupas", "Calçados","Acessórios"),
+	valor real,
+	quantidade int,
+    dt_entrada_estoque date,
+    
+    primary key (id_produto)
+) ENGINE InnoDB ;
+
+-- drop table tbcompras;
+create table tbcompras(
+	id_compra bigint(8) auto_increment, -- 9999
+	id_produto bigint(4),
+    cpf int(11),
+    dt_compra date,
+    vl_compra decimal(10,2),
+    
+    -- primary key (cpf, id_produto), -- chave composta
+    primary key (id_compra),
+    
+    CONSTRAINT fk_id_produto FOREIGN KEY (id_produto) 
+		REFERENCES tbprodutos (id_produto) 
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
+        
+	CONSTRAINT fk_cpf FOREIGN KEY (cpf) 
+		REFERENCES tbclientes (cpf)
+    
+) ENGINE InnoDB; 
+-- mecanimsmo que pertence a ORACLE que permite o suporte a chaves estrangeiras e garandi o ACID. 
+Existem outras ENGINEs mas esta é a mais completa.
+-- ACID significa (papel do ENGINE)
+-- A - Atomicidade: não pode ser dividida em subtarefas. Ou tudo é feito ou nada é feito
+-- C - ConsistÊncia: Um banco de dados consistente antes da execução, ele deve continuar consistente
+-- I - Isolamento: Duas transações, mesmo sendo executadas ao mesmo tempo, não podem afetar uma à outra
+-- D - Durabilidade: uma vez o dado registrado ele não pode ser alterado e deve ficar assim o tem que for necessario
+
+
+-- passo 3: criacao dos relacionamentos
+ ALTER TABLE tbcompras
+  ADD CONSTRAINT fkidproduto FOREIGN KEY (id_produto) REFERENCES tbprodutos (id_produto),
+  ADD CONSTRAINT fkcpf FOREIGN KEY (cpf) REFERENCES tbclientes (cpf);
+
+-- veja como foram criadas as tabelas
+describe tbcompras;
+describe tbprodutos;
+
+-- passo 4 : inserindo dados
+insert into tbprodutos(id_produto, nome, marca, categoria , valor, quantidade, dt_entrada_estoque)
+	      Values (1, "Camiseta" ,"Adidas", "Roupas", "230.0", 10, "2021-04-10"),
+	             (2, "Tênis Masculino", "Nike", "Calçados", "650.0", 25, "2021-04-25"),
+				 (3, "Blusa", "Puma", "Roupas", "210.0", 13, "2021-05-04"),
+                 (4, "Cinto", "Nike",  "Acessórios", "25.0", 8, "2021-03-07"),                    
+				 (5, "Conjunto", "Adidas", "Roupas", "525.0", 10, "2021-06-10"),
+                 (6, "Blusa Feminina", "Nike","Roupas", "550.0", 26, "2021-04-21"),
+		         (7, "Calça Masculina","Adidas", "Roupas", "80.0", 10, "2021-06-10"),
+		         (8, "Tênis Feminino","Adidas", "Calçados", "330.0", 10, "2021-07-23");
+
+-- passo5: testando se os dados foram inseridos corretamente
+select nome as 'Nome do Produto', date_format(dt_entrada_estoque, '%d/%m/%Y') as 'Data de entrada no estoque' 
+from tbprodutos;
+
+-- passo6: testando outras opcoes de selecao
+select * from tbprodutos;
+select * from tbprodutos where valor > 500.0;
+select * from tbprodutos where valor < 500.0;
+
+-- passo7: testando a atualizacao de dados da tabela produtos
+update `dbecommerce`.`tbprodutos` set `valor`='250.0' where(`id_produto`= '1');
+
+-- passo8: testando a ataulizacao dos valores na tabela produtos
+select * from tbprodutos where id_produto = '1';
+
+-- passo9: cadastrando clientes e compras
+insert into tbclientes(cpf, nome)
+	      Values (00100200344 ,"Joao"),
+	             (00100200345 ,"Maria"),
+				 (00100200346 ,"Jose"),
+                 (00100200347 ,"Patrick"),                    
+				 (00100200348 ,"Heloisa");
+                 
+select * from tbclientes;
+
+-- passo10: cadastrando clientes e compras
+insert into tbcompras(id_produto,cpf,dt_compra,vl_compra)
+	      Values (1, 00100200344 ,"2023-03-12",50.0);
+
+select * from tbcompras;
+
+-- passo11: faca os seguintes testes
+-- a) tente cadastrar um cliente que já existe
+insert into tbclientes(cpf, nome)
+	      Values (00100200349 ,"Joao"); -- vai dar certo, pois a chave primária é o código de compra. um cliente pode comprar o mesmo produto várias vezes
+
+-- b) tente cadastrar um produto que já existe
+insert into tbprodutos(id_produto, nome, marca, categoria , valor, quantidade, dt_entrada_estoque)
+	      Values (1, "Camiseta" ,"Adidas", "Roupas", "230.0", 10, "2021-04-10"); 
+
+-- ele não vai conseguir, pois para o banco de dados o campo idproduto é a chave e este não se repete. 
+select * from tbprodutos;
+          
+-- cadastrar uma compra para um cpf que não existe na base
+insert into tbcompras(id_produto,cpf,dt_compra,vl_compra)
+	      Values (1, 00100200340 ,"2023-03-12",50.0); 
+        -- não deve conseguir em função da restrição que criamos
+select * from tbcompras;
+
+-- cadastrar uma compra para um  produto que não existe na base
+insert into tbcompras(id_produto,cpf,dt_compra,vl_compra)
+	      Values (9, 00100200343 ,"2023-03-12",50.0); 
+        -- não deve conseguir em função da restrição que criamos
+
+-- tente apagar um produto comprado
+delete from tbprodutos where id_produto = "1";
+
+-- tente apagar um cliente que já fez uma compra
+delete from tbprodutos where id_produto = "";
+
+-- tente apagar uma compra
+delete from tbcompras where id_produto = "1";
+
+-- tente apagar um cliente que nao comprou
+-- tente apagar um produto que não foi comprado
