@@ -29,3 +29,33 @@ UPDATE tbprodutos SET valor = "230.50" WHERE id_produto = 1;
 
 DELETE tbprodutos WHERE valor < 100
 
+--OBJETIVO DE APRENDIZAGEM 2 : ATIVIDADE 1
+create table tbcompras(
+	id_compra bigint(8), -- 9999
+	id_produto bigint(4),
+    cpf int(11),
+    dt_compra date,
+    vl_compra decimal(10,2),
+    
+    -- primary key (cpf, id_produto), -- chave composta
+    primary key (id_compra),
+    
+    CONSTRAINT fk_id_produto FOREIGN KEY (id_produto) 
+		REFERENCES tbprodutos (id_produto) 
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
+        
+	CONSTRAINT fk_cpf FOREIGN KEY (cpf) 
+		REFERENCES tbclientes (cpf)
+    
+) ; 
+
+insert into tbcompras(id_produto,cpf,dt_compra,vl_compra)
+	      Values (1, 00100200344 ,"2023-03-12",50.0);
+insert into tbcompras(id_produto,cpf,dt_compra,vl_compra)
+	      Values (2, 00100200344 ,"2023-03-21",500.0);
+insert into tbcompras(id_produto,cpf,dt_compra,vl_compra)
+	      Values (2, 00100200344 ,"2023-04-21",550.0);
+SELECT * FROM tbcompras;
+SELECT tbclientes.nome, tbcompras.dt_compra FROM tbclientes INNER JOIN tbcompras ON tbcompras.cpf = tbclientes.cpf;
+
