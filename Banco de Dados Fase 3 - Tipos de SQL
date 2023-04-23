@@ -1,0 +1,19 @@
+drop TABLE tbclientes;
+CREATE TABLE tbclientes (
+  `cpf` int(11) NOT NULL,
+  `nome` varchar(80) DEFAULT NULL,
+  PRIMARY KEY (`cpf`)
+);
+
+drop table tbprodutos;
+create table tbprodutos(
+	id_produto bigint(4), -- 9999
+	nome varchar (30) not null,
+    --marca enum('Nike', 'Adidas', 'Puma'),
+	--categoria enum("Roupas", "Calçados","Acessórios"),
+	valor real,
+	quantidade int,
+    dt_entrada_estoque date,
+    
+    primary key (id_produto)
+);
