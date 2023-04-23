@@ -1,3 +1,4 @@
+--Comandos DDL
 drop TABLE tbclientes;
 CREATE TABLE tbclientes (
   `cpf` int(11) NOT NULL,
@@ -9,11 +10,22 @@ drop table tbprodutos;
 create table tbprodutos(
 	id_produto bigint(4), -- 9999
 	nome varchar (30) not null,
-    --marca enum('Nike', 'Adidas', 'Puma'),
-	--categoria enum("Roupas", "Calçados","Acessórios"),
 	valor real,
 	quantidade int,
     dt_entrada_estoque date,
     
     primary key (id_produto)
 );
+
+--Comandos DML
+insert into tbclientes(cpf, nome)
+	      Values (00100200344 ,"Joao"),
+	             (00100200345 ,"Maria"),
+		 (00100200346 ,"Jose"),
+                  	(00100200347 ,"Patrick"),                    
+		 (00100200348 ,"Heloisa");
+
+UPDATE tbprodutos SET valor = "230.50" WHERE id_produto = 1;
+
+DELETE tbprodutos WHERE valor < 100
+
